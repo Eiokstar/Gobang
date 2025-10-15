@@ -344,11 +344,14 @@ public class Game {
         public void allChess(){
             Game.Difficulty difficulty = main.game.getAiDifficulty();
             if(difficulty == Game.Difficulty.EASY){
-                makeRandomMove();
-            }else if(difficulty == Game.Difficulty.HARD){
-                makeBestMove(true);
-            }else{
+                // 原本的中等難度評估邏輯移至簡單難度
                 makeBestMove(false);
+            }else if(difficulty == Game.Difficulty.MEDIUM){
+                // 新的中等難度：使用淺層極大極小策略，兼顧攻守
+                makeStrategicMove(2, 12, false);
+            }else{
+                // 新的困難難度：更深層的搜尋並偏向進攻
+                makeStrategicMove(3, 16, true);
             }
         }
 
@@ -414,6 +417,189 @@ public class Game {
             if(bestX>=0 && bestY>=0){
                 main.mouseListener.aiPlayChess(bestX,bestY);
             }
+        }
+
+        private void makeStrategicMove(int depth,int candidateWidth,boolean aggressive){
+            int aiPlayer = main.game.getCurrentPlayer();
+            int opponent = aiPlayer == 1 ? 2 : 1;
+
+            ArrayList<int[]> candidates = generateCandidateMoves(aiPlayer,candidateWidth);
+            if(candidates.isEmpty()){
+                makeBestMove(false);
+                return;
+            }
+
+            int bestScore = Integer.MIN_VALUE;
+            int bestX = -1;
+            int bestY = -1;
+
+            for(int[] move : candidates){
+                int x = move[0];
+                int y = move[1];
+                allPlayChessed[x][y] = aiPlayer;
+                int score = minimax(depth - 1,false,aiPlayer,opponent,candidateWidth,aggressive,Integer.MIN_VALUE/2,Integer.MAX_VALUE/2);
+                allPlayChessed[x][y] = 0;
+
+                if(score>bestScore || (score==bestScore && isCloserToCenter(x,y,bestX,bestY))){
+                    bestScore = score;
+                    bestX = x;
+                    bestY = y;
+                }
+            }
+
+            if(bestX>=0 && bestY>=0){
+                main.mouseListener.aiPlayChess(bestX,bestY);
+            }else{
+                makeBestMove(false);
+            }
+        }
+
+        private int minimax(int depth,boolean maximizing,int aiPlayer,int currentPlayer,int candidateWidth,boolean aggressive,int alpha,int beta){
+            int opponent = currentPlayer == 1 ? 2 : 1;
+
+            if(depth<=0 || isBoardFull()){
+                return evaluateBoardState(aiPlayer,aggressive);
+            }
+
+            ArrayList<int[]> moves = generateCandidateMoves(currentPlayer,candidateWidth);
+            if(moves.isEmpty()){
+                return evaluateBoardState(aiPlayer,aggressive);
+            }
+
+            if(maximizing){
+                int maxEval = Integer.MIN_VALUE;
+                for(int[] move : moves){
+                    int x = move[0];
+                    int y = move[1];
+                    allPlayChessed[x][y] = currentPlayer;
+                    int eval = minimax(depth-1,false,aiPlayer,opponent,candidateWidth,aggressive,alpha,beta);
+                    allPlayChessed[x][y] = 0;
+                    if(eval>maxEval){
+                        maxEval = eval;
+                    }
+                    if(eval>alpha){
+                        alpha = eval;
+                    }
+                    if(beta<=alpha){
+                        break;
+                    }
+                }
+                return maxEval;
+            }else{
+                int minEval = Integer.MAX_VALUE;
+                for(int[] move : moves){
+                    int x = move[0];
+                    int y = move[1];
+                    allPlayChessed[x][y] = currentPlayer;
+                    int eval = minimax(depth-1,true,aiPlayer,opponent,candidateWidth,aggressive,alpha,beta);
+                    allPlayChessed[x][y] = 0;
+                    if(eval<minEval){
+                        minEval = eval;
+                    }
+                    if(eval<beta){
+                        beta = eval;
+                    }
+                    if(beta<=alpha){
+                        break;
+                    }
+                }
+                return minEval;
+            }
+        }
+
+        private ArrayList<int[]> generateCandidateMoves(int perspectivePlayer,int candidateWidth){
+            ArrayList<int[]> result = new ArrayList<>();
+            ArrayList<int[]> scoredMoves = new ArrayList<>();
+            boolean hasPieces = false;
+
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=0){
+                        hasPieces = true;
+                        continue;
+                    }
+                    if(!hasNearbyPieces(i,j)){
+                        continue;
+                    }
+                    int score = juddingScore(i,j,perspectivePlayer);
+                    scoredMoves.add(new int[]{i,j,score});
+                }
+            }
+
+            if(!hasPieces){
+                result.add(new int[]{7,7});
+                return result;
+            }
+
+            scoredMoves.sort((a,b) -> Integer.compare(b[2],a[2]));
+
+            int limit = candidateWidth>0 ? Math.min(candidateWidth, scoredMoves.size()) : scoredMoves.size();
+            for(int idx=0; idx<limit; idx++){
+                int[] move = scoredMoves.get(idx);
+                result.add(new int[]{move[0],move[1]});
+            }
+            return result;
+        }
+
+        private boolean hasNearbyPieces(int x,int y){
+            for(int dx=-2; dx<=2; dx++){
+                for(int dy=-2; dy<=2; dy++){
+                    if(dx==0 && dy==0){
+                        continue;
+                    }
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if(inBounds(nx,ny) && allPlayChessed[nx][ny]!=0){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean isBoardFull(){
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]==0){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private int evaluateBoardState(int aiPlayer,boolean aggressive){
+            int opponent = aiPlayer == 1 ? 2 : 1;
+            int bestAi = 0;
+            int bestOpponent = 0;
+
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=0){
+                        continue;
+                    }
+                    int aiScore = juddingScore(i,j,aiPlayer);
+                    int opponentScore = juddingScore(i,j,opponent);
+                    if(aiScore>bestAi){
+                        bestAi = aiScore;
+                    }
+                    if(opponentScore>bestOpponent){
+                        bestOpponent = opponentScore;
+                    }
+                }
+            }
+
+            if(bestAi>=100000){
+                return Integer.MAX_VALUE/4;
+            }
+            if(bestOpponent>=100000){
+                return Integer.MIN_VALUE/4;
+            }
+
+            if(aggressive){
+                return bestAi * 2 - bestOpponent;
+            }
+            return bestAi - bestOpponent;
         }
 
         private int calculateHardScore(int x,int y,int aiPlayer){
