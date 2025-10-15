@@ -5,13 +5,12 @@ import GoBang.Listener.MouseListener;
 import GoBang.Game.Judging;
 import GoBang.Game.Score;
 import GoBang.network.NetworkManager;
-import GoBang.MoveCoordinator;
 
 import javax.swing.*;
 
-public class Main {
+public class main {
 
-    public static Main instance;
+    public static main instance;
     public static UI UI = new UI();
     public static Game game = new Game();
     public static Judging judging = new Judging();
@@ -22,12 +21,13 @@ public class Main {
     public static MouseListener mouseListener = new MouseListener();
 
     public static void main(String[] args) {
-        instance = new Main();
+        instance = new main();
         UI.showUI();
     }
 
-    public Main() {
-        // 網路事件處理註冊
+    /** 🔧 修正：建構子名稱需與類別名稱相同 (main)，不是 Main */
+    public main() {
+        // 設定網路事件處理
         networkManager.setMoveHandler(new NetworkManager.MoveHandler() {
             @Override
             public void onMoveReceived(int x, int y) {
@@ -64,7 +64,8 @@ public class Main {
         });
     }
 
-    public static Main getInstance() {
+    /** 🔧 修正：getInstance() 的回傳型別與類別名稱一致 */
+    public static main getInstance() {
         return instance;
     }
 

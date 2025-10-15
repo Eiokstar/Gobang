@@ -1,18 +1,18 @@
 package GoBang.Listener;
 
 import GoBang.MoveCoordinator;
-import GoBang.Main;
+import GoBang.main;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
 
-import static GoBang.Main.game;
+import static GoBang.main.game;
 
 public class MouseListener implements java.awt.event.MouseListener {
 
-    private GoBang.UI UI = Main.getUI();
-    private MoveCoordinator moveCoordinator = Main.getMoveCoordinator();
+    private GoBang.UI UI = main.getUI();
+    private MoveCoordinator moveCoordinator = main.getMoveCoordinator();
 
     @Override
     public void mouseClicked(MouseEvent e) {

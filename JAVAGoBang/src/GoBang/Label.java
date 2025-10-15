@@ -40,14 +40,14 @@ public class Label {
         textmode.setFont(titleFont);
         textmode.setOpaque(false);
 
-        // === 難度標題與內容 ===
-        difficultyTitle.setFont(titleFont);
-        difficultyTitle.setOpaque(false);
-
-        difficultyValue.setFont(titleFont);
-        difficultyValue.setBackground(UI.BACK_COLOR);
-        difficultyValue.setOpaque(true);
-        difficultyValue.setHorizontalAlignment(SwingConstants.LEFT);
+//        // === 難度標題與內容 ===
+//        difficultyTitle.setFont(titleFont);
+//        difficultyTitle.setOpaque(false);
+//
+//        difficultyValue.setFont(titleFont);
+//        difficultyValue.setBackground(UI.BACK_COLOR);
+//        difficultyValue.setOpaque(true);
+//        difficultyValue.setHorizontalAlignment(SwingConstants.LEFT);
 
         // === 勝負顯示 ===
         textWin.setFont(new Font("微軟正黑體", Font.BOLD, 40));

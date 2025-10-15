@@ -1,14 +1,14 @@
 package GoBang.Listener;
 
 import GoBang.Game;
-import GoBang.Main;
+import GoBang.main;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import javax.swing.*;
 
-import static GoBang.Main.game;
-import static GoBang.Main.score;
+import static GoBang.main.game;
+import static GoBang.main.score;
 
 public class ActionListener implements java.awt.event.ActionListener {
 
@@ -21,7 +21,7 @@ public class ActionListener implements java.awt.event.ActionListener {
     private static final String DIFFICULTY_MEDIUM = "中等AI";
     private static final String DIFFICULTY_HARD = "困難AI";
 
-    private GoBang.UI UI = Main.getUI();
+    private GoBang.UI UI = main.getUI();
 
     @Override
     public void actionPerformed(ActionEvent event) {
@@ -51,7 +51,7 @@ public class ActionListener implements java.awt.event.ActionListener {
     private void selectHumanVsHuman() {
         if (game.Started) return;
 
-        Main.networkManager.close();
+        main.networkManager.close();
         game.vsHumanMode = true;
         game.vsComputerMode = false;
         game.onlineMode = false;
@@ -70,7 +70,7 @@ public class ActionListener implements java.awt.event.ActionListener {
         Game.Difficulty selected = promptDifficultySelection();
         if (selected == null) return;
 
-        Main.networkManager.close();
+        main.networkManager.close();
         game.vsComputerMode = true;
         game.vsHumanMode = false;
         game.onlineMode = false;
@@ -90,7 +90,7 @@ public class ActionListener implements java.awt.event.ActionListener {
             return;
         }
 
-        Main.networkManager.close();
+        main.networkManager.close();
         game.vsHumanMode = false;
         game.vsComputerMode = false;
         game.onlineMode = true;
@@ -142,7 +142,7 @@ public class ActionListener implements java.awt.event.ActionListener {
             int port = Integer.parseInt(portText.trim());
             game.onlineHost = true;
             game.onlineMyTurn = true;
-            Main.networkManager.host(port);
+            main.networkManager.host(port);
             JOptionPane.showMessageDialog(UI.windows, "等待玩家連線...", "聯機對戰", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(UI.windows, "無效的埠號。", "錯誤", JOptionPane.ERROR_MESSAGE);
@@ -170,7 +170,7 @@ public class ActionListener implements java.awt.event.ActionListener {
             int port = Integer.parseInt(portText.trim());
             game.onlineHost = false;
             game.onlineMyTurn = false;
-            Main.networkManager.connect(host.trim(), port);
+            main.networkManager.connect(host.trim(), port);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(UI.windows, "無效的埠號。", "錯誤", JOptionPane.ERROR_MESSAGE);
             cancelOnlineSelection();
@@ -185,7 +185,7 @@ public class ActionListener implements java.awt.event.ActionListener {
         game.onlineHost = false;
         game.onlineMyTurn = false;
         UI.setPlayersLabel("");
-        Main.networkManager.close();
+        main.networkManager.close();
     }
 
     // === 遊戲控制 ===
@@ -198,7 +198,7 @@ public class ActionListener implements java.awt.event.ActionListener {
 
     private void startGame() {
         if (game.onlineMode) {
-            if (!Main.networkManager.isConnected()) {
+            if (!main.networkManager.isConnected()) {
                 JOptionPane.showMessageDialog(UI.windows, "尚未建立連線。", "提示", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -229,7 +229,7 @@ public class ActionListener implements java.awt.event.ActionListener {
 
             if (game.vsComputerMode && game.backHand) {
                 if (game.chessMove == 0) {
-                    SwingUtilities.invokeLater(() -> Main.mouseListener.aiPlayChess(7, 7));
+                    SwingUtilities.invokeLater(() -> main.mouseListener.aiPlayChess(7, 7));
                 } else {
                     SwingUtilities.invokeLater(() -> score.allChess());
                 }
@@ -331,7 +331,7 @@ public class ActionListener implements java.awt.event.ActionListener {
         game.setAiDifficulty(difficulty);
 
         if (needSelectMode) {
-            Main.networkManager.close();
+            main.networkManager.close();
             game.vsComputerMode = true;
             game.vsHumanMode = false;
             game.onlineMode = false;

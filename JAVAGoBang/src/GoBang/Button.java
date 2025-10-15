@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Button {
-    private final Main instance = Main.getInstance();
+    private final main instance = main.getInstance();
 
     JButton[] topButton = new JButton[4];
     JButton[] chooseButton = new JButton[3];
@@ -25,9 +25,9 @@ public class Button {
     public Button() {
         TopButton();
         ChooseButton();
-        DifficultyButtons();
+//        DifficultyButtons();
         SureButton();
-        PiecesDisappear();
+//        PiecesDisappear();
         firstBack();
     }
 
@@ -59,19 +59,19 @@ public class Button {
         return chooseButton;
     }
 
-    // AI 難度按鈕（簡單AI、中等AI、困難AI）
-    public JButton[] DifficultyButtons() {
-        for (int i = 0; i < difficultyButtonName.length; i++) {
-            difficultyButtons[i] = new JButton(difficultyButtonName[i]);
-            difficultyButtons[i].addActionListener(instance.actionListener);
-            difficultyButtons[i].setFont(new Font("微軟正黑體", Font.BOLD, 24));
-            difficultyButtons[i].setFocusPainted(false);
-            difficultyButtons[i].setBorder(BorderFactory.createRaisedBevelBorder());
-            difficultyButtons[i].setAlignmentX(Component.LEFT_ALIGNMENT);
-            difficultyButtons[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        }
-        return difficultyButtons;
-    }
+//    // AI 難度按鈕（簡單AI、中等AI、困難AI）
+//    public JButton[] DifficultyButtons() {
+//        for (int i = 0; i < difficultyButtonName.length; i++) {
+//            difficultyButtons[i] = new JButton(difficultyButtonName[i]);
+//            difficultyButtons[i].addActionListener(instance.actionListener);
+//            difficultyButtons[i].setFont(new Font("微軟正黑體", Font.BOLD, 24));
+//            difficultyButtons[i].setFocusPainted(false);
+//            difficultyButtons[i].setBorder(BorderFactory.createRaisedBevelBorder());
+//            difficultyButtons[i].setAlignmentX(Component.LEFT_ALIGNMENT);
+//            difficultyButtons[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+//        }
+//        return difficultyButtons;
+//    }
 
     // 先手 / 後手 按鈕
     public JButton[] firstBack() {
@@ -94,11 +94,11 @@ public class Button {
         return sureButton;
     }
 
-    // 回復棋子按鈕
-    public JButton PiecesDisappear() {
-        piecesDisappear.addActionListener(instance.actionListener);
-        piecesDisappear.setFont(new Font("微軟正黑體", Font.BOLD, 26));
-        piecesDisappear.setFocusPainted(false);
-        return piecesDisappear;
-    }
+//    // 回復棋子按鈕
+//    public JButton PiecesDisappear() {
+//        piecesDisappear.addActionListener(instance.actionListener);
+//        piecesDisappear.setFont(new Font("微軟正黑體", Font.BOLD, 26));
+//        piecesDisappear.setFocusPainted(false);
+//        return piecesDisappear;
+//    }
 }
