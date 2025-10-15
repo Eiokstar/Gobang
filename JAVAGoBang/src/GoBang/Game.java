@@ -423,18 +423,6 @@ public class Game {
             int aiPlayer = main.game.getCurrentPlayer();
             int opponent = aiPlayer == 1 ? 2 : 1;
 
-            int[] immediateWin = findImmediateLineCompletion(aiPlayer);
-            if(immediateWin != null){
-                main.mouseListener.aiPlayChess(immediateWin[0],immediateWin[1]);
-                return;
-            }
-
-            int[] urgentBlock = findImmediateLineCompletion(opponent);
-            if(urgentBlock != null){
-                main.mouseListener.aiPlayChess(urgentBlock[0],urgentBlock[1]);
-                return;
-            }
-
             ArrayList<int[]> candidates = generateCandidateMoves(aiPlayer,candidateWidth);
             if(candidates.isEmpty()){
                 makeBestMove(false);
@@ -469,23 +457,6 @@ public class Game {
             }else{
                 makeBestMove(false);
             }
-        }
-
-        private int[] findImmediateLineCompletion(int player){
-            for(int i=0;i<=14;i++){
-                for(int j=0;j<=14;j++){
-                    if(allPlayChessed[i][j]!=0){
-                        continue;
-                    }
-                    allPlayChessed[i][j] = player;
-                    boolean completes = completesFive(i,j,player);
-                    allPlayChessed[i][j] = 0;
-                    if(completes){
-                        return new int[]{i,j};
-                    }
-                }
-            }
-            return null;
         }
 
         private int minimax(int depth,boolean maximizing,int aiPlayer,int currentPlayer,int candidateWidth,boolean aggressive,int alpha,int beta){
