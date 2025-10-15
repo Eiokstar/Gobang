@@ -69,11 +69,16 @@ public class main {
         Game.Difficulty difficulty = game.getAiDifficulty();
         game = new Game();
         game.setAiDifficulty(difficulty);
+
         moveCoordinator.setGame(game);
         moveCoordinator.setJudging(judging);
         moveCoordinator.setScore(score);
         moveCoordinator.setUi(UI);
         moveCoordinator.setNetworkManager(networkManager);
+    }
+
+
+    main
     }
     public static GoBang.UI getUI(){
         return UI;
