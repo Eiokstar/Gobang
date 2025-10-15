@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public  class Button{
     private main instance = main.getInstance();
-    static int x01 = 140,  y02=530 ,x03=1040;
+    static int x01 = 140,  y02=530 ,x03=1340;
     JButton[] topButton = new JButton[4];
     JButton[] chooseButton = new JButton[3];
     JButton[] firstbackButton = new JButton[2];
