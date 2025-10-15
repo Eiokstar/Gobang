@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import GoBang.Listener.MouseListener;
-import GoBang.main;
+import GoBang.Main;
 
 public class Game {
     private int currentPlayer=1;
@@ -40,8 +40,8 @@ public class Game {
     public static int[][] allScoreChessed = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
     public static int[][] allPlayChessed = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
     private ArrayList<ArrayList<int[]>> PlacedPieces;
-    private GoBang.UI UI = main.getUI();
-    private static GoBang.Listener.MouseListener MosList = main.getMouseListener();
+    private GoBang.UI UI = Main.getUI();
+    private static GoBang.Listener.MouseListener MosList = Main.getMouseListener();
     Game(){
         initPlacePieces();
         initStatus();
@@ -155,7 +155,7 @@ public class Game {
     public static class Judging{
 
         private int leftWinLine = 0, rightWinLine = 0,onWinLine = 0,downWinLine=0,leftSlashON=0,leftSlashDown=0,rightSlashON=0,rightSlashDown=0;
-        private GoBang.UI UI = main.getUI();
+        private GoBang.UI UI = Main.getUI();
         public int[] judgingHorizontalineLeft(int[] point, int size, ArrayList blockOrWhite) {
 
             int Loc01[] = point;
@@ -342,7 +342,7 @@ public class Game {
         private final Random random = new Random();
 
         public void allChess(){
-            Game.Difficulty difficulty = main.game.getAiDifficulty();
+            Game.Difficulty difficulty = Main.game.getAiDifficulty();
             if(difficulty == Game.Difficulty.EASY){
                 makeRandomMove();
             }else if(difficulty == Game.Difficulty.HARD){
@@ -353,7 +353,7 @@ public class Game {
         }
 
         public int juddingScore(int i,int j){
-            int aiPlayer = main.game.getCurrentPlayer();
+            int aiPlayer = Main.game.getCurrentPlayer();
             return juddingScore(i,j,aiPlayer);
         }
 
@@ -381,19 +381,19 @@ public class Game {
             }
 
             int[] move;
-            if(main.game.chessMove==0){
+            if(Main.game.chessMove==0){
                 move = new int[]{7,7};
             }else{
                 move = available.get(random.nextInt(available.size()));
             }
-            main.mouseListener.aiPlayChess(move[0],move[1]);
+            Main.mouseListener.aiPlayChess(move[0],move[1]);
         }
 
         private void makeBestMove(boolean hardMode){
             int bestScore = Integer.MIN_VALUE;
             int bestX = -1;
             int bestY = -1;
-            int aiPlayer = main.game.getCurrentPlayer();
+            int aiPlayer = Main.game.getCurrentPlayer();
 
             for(int i =0 ; i<=14; i++){
                 for(int j=0 ; j<=14 ;j++){
@@ -412,7 +412,7 @@ public class Game {
             }
 
             if(bestX>=0 && bestY>=0){
-                main.mouseListener.aiPlayChess(bestX,bestY);
+                Main.mouseListener.aiPlayChess(bestX,bestY);
             }
         }
 

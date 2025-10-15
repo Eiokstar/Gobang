@@ -157,12 +157,12 @@ public class UI extends JPanel {
         windows.setLocationRelativeTo(null);
         windows.setVisible(true);
         windows.setResizable(true);
-        setDifficultyLabel(main.game.getAiDifficulty());
+        setDifficultyLabel(Main.game.getAiDifficulty());
         refreshBoard();
     }
 
     private void ensureBoardMouseListener() {
-        MouseListener listener = main.mouseListener;
+        MouseListener listener = Main.mouseListener;
         boolean attached = false;
         for (MouseListener existing : boardPanel.getMouseListeners()) {
             if (existing == listener) {
@@ -185,15 +185,15 @@ public class UI extends JPanel {
     }
 
     public void reSetUIAndGame() {
-        main.initGame();
-        main.moveCoordinator.setUi(this);
+        Main.initGame();
+        Main.moveCoordinator.setUi(this);
         initRoundLabel();
-        main.judging.setNumberWinLine();
+        Main.judging.setNumberWinLine();
         labels.textRound.setText(" ");
         labels.showRoundPlayer.setText(" ");
         setPlayersLabel("");
-        main.networkManager.close();
-        setDifficultyLabel(main.game.getAiDifficulty());
+        Main.networkManager.close();
+        setDifficultyLabel(Main.game.getAiDifficulty());
         setModeControlsVisible(true);
         refreshBoard();
     }
@@ -208,7 +208,7 @@ public class UI extends JPanel {
     }
 
     public void setRoundLabel() {
-        Game game = main.game;
+        Game game = Main.game;
         if (!game.Started) {
             setRound(" ");
             return;
@@ -243,7 +243,7 @@ public class UI extends JPanel {
 
     // === 勝負顯示 ===
     public void lossFarm() {
-        main.game.Started = false;
+        Main.game.Started = false;
         setModeControlsVisible(true);
         Button button = new Button();
         setWinLossLabel(0);
@@ -252,7 +252,7 @@ public class UI extends JPanel {
     }
 
     public void winFram() {
-        main.game.Started = false;
+        Main.game.Started = false;
         setModeControlsVisible(true);
         Button button = new Button();
         setWinLossLabel(1);
@@ -261,7 +261,7 @@ public class UI extends JPanel {
     }
 
     public void andBureauFram() {
-        main.game.Started = false;
+        Main.game.Started = false;
         setModeControlsVisible(true);
         Button button = new Button();
         setWinLossLabel(2);
@@ -278,7 +278,7 @@ public class UI extends JPanel {
     }
 
     public void setWinLossLabel(int index) {
-        Game game = main.game;
+        Game game = Main.game;
         if (game.vsHumanMode) {
             if (labels.RoundPlayerName[game.getCurrentPlayer()].equals("玩家")) {
                 setWinLossPlayer(labels.RoundPlayerName[game.getCurrentPlayer() - 2],
@@ -427,7 +427,7 @@ public class UI extends JPanel {
         }
 
         private void drawPieces(Graphics2D g2) {
-            Game game = main.game;
+            Game game = Main.game;
             if (game == null) {
                 return;
             }

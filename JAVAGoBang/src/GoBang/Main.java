@@ -9,9 +9,9 @@ import GoBang.MoveCoordinator;
 
 import javax.swing.*;
 
-public class main {
+public class Main {
 
-    public static main instance;
+    public static Main instance;
     public static UI UI = new UI();
     public static Game game = new Game();
     public static Judging judging = new Judging();
@@ -22,11 +22,11 @@ public class main {
     public static MouseListener mouseListener = new MouseListener();
 
     public static void main(String[] args) {
-        instance = new main();
+        instance = new Main();
         UI.showUI();
     }
 
-    public main() {
+    public Main() {
         // 網路事件處理註冊
         networkManager.setMoveHandler(new NetworkManager.MoveHandler() {
             @Override
@@ -64,7 +64,7 @@ public class main {
         });
     }
 
-    public static main getInstance() {
+    public static Main getInstance() {
         return instance;
     }
 
