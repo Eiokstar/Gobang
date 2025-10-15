@@ -7,17 +7,20 @@ public  class Button{
     static int x01 = 140,  y02=530 ,x03=1340;
     JButton[] topButton = new JButton[4];
     JButton[] chooseButton = new JButton[3];
+    JButton[] difficultyButtons = new JButton[3];
     JButton[] firstbackButton = new JButton[2];
     JButton sureButton = new JButton("確定");
     JButton piecesDisappear = new JButton("回復棋子");
     String[] topButtonImageLocation = {"image/fast01.png","image/magic-wand01.png","image/whiteflag01.png","image/return01.png"};
     String[] topButtonName = {"開始","悔棋","認輸","重新"};
     String[] firstbackName ={"先手","後手"};
+    String[] difficultyButtonName = {"簡單AI","中等AI","困難AI"};
 
 
     Button(){
         TopButton();
         ChooseButton();
+        DifficultyButtons();
         SureButton();
         PiecesDisappear();
         firstBack();
@@ -49,6 +52,19 @@ public  class Button{
             chooseButton[i].setBorderPainted(false);
         }
         return chooseButton;
+    }
+
+    public JButton[] DifficultyButtons(){
+        int startY = y02 + chooseButtonName.length * 70 + 40;
+        for (int i = 0, j = 0; i < difficultyButtonName.length; i++, j += 60) {
+            difficultyButtons[i] = new JButton(difficultyButtonName[i]);
+            difficultyButtons[i].addActionListener(instance.actionListener);
+            difficultyButtons[i].setBounds(1020, startY + j, 220, 45);
+            difficultyButtons[i].setFont(new java.awt.Font("微軟正黑體", 1, 30));
+            difficultyButtons[i].setBorder(BorderFactory.createRaisedBevelBorder());
+            difficultyButtons[i].setBorderPainted(false);
+        }
+        return difficultyButtons;
     }
     public JButton[] firstBack(){
         for(int i=0,j=0;i<2;i++,j=100){

@@ -97,6 +97,7 @@ public class UI extends JPanel{
         windows.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         windows.setVisible(true);
         windows.setResizable((false));
+        setDifficultyLabel(main.game.getAiDifficulty());
 
 
 
@@ -106,6 +107,8 @@ public class UI extends JPanel{
         windows.add(labels.textRound);
         windows.add(labels.showRoundPlayer[0]);
         windows.add(labels.showPlayer);
+        windows.add(labels.difficultyTitle);
+        windows.add(labels.difficultyValue);
         windows.add(labels.piecesDisappear);
 
         for(int i = 0 ;i<15;i++){
@@ -124,6 +127,9 @@ public class UI extends JPanel{
 
         for(int i=0;i< button.chooseButton.length;i++){
             windows.getContentPane().add(button.chooseButton[i]);
+        }
+        for(int i=0;i<button.difficultyButtons.length;i++){
+            windows.getContentPane().add(button.difficultyButtons[i]);
         }
         for(int i=0;i<button.firstbackButton.length;i++){
             windows.getContentPane().add(button.firstbackButton[i]);
@@ -161,6 +167,7 @@ public class UI extends JPanel{
         labels.textRound.setText(" ");
         labels.showRoundPlayer[0].setText(" ");
         main.networkManager.close();
+        setDifficultyLabel(main.game.getAiDifficulty());
     }
     private void setRound(String str){
         labels.textRound.setText("目前回合: "+str);
@@ -195,6 +202,14 @@ public class UI extends JPanel{
             return;
         }
         setRound(" ");
+    }
+
+    public void setDifficultyLabel(Game.Difficulty difficulty){
+        if(difficulty == null){
+            labels.difficultyValue.setText("—");
+        }else{
+            labels.difficultyValue.setText(difficulty.getDisplayName());
+        }
     }
     public void lossFarm(){
         Button button = new Button();
