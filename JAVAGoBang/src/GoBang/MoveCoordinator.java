@@ -75,10 +75,6 @@ public class MoveCoordinator {
 
         int placedPlayer = game.getCurrentPlayer();
 
-        // 在 UI 上繪製棋子
-        JLabel targetCell = ui.labels.boardButtons[boardX][boardY];
-        ui.DrawPiecesInBoard(targetCell.getX(), targetCell.getY() + 28, placedPlayer);
-
         // 更新遊戲資料
         game.addPointToPlacedPieces(placedPlayer, boardX, boardY);
         game.allPlayChessed[boardX][boardY] = placedPlayer;
@@ -92,7 +88,9 @@ public class MoveCoordinator {
         game.changeCurrentPlayer();
 
         // 更新畫面
-        ui.refreshBoard();
+        if (ui != null) {
+            ui.refreshBoard();
+        }
 
         // 根據來源後續處理（AI、自動同步、遠端）
         handlePostMove(source, boardX, boardY);
