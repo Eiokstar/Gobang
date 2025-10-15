@@ -12,8 +12,6 @@ public class Label{
 
     JLabel textRound = new JLabel("  ");
     JLabel textmode = new JLabel("模式:");
-    public JLabel difficultyTitle = new JLabel("難度:");
-    public JLabel difficultyValue = new JLabel("");
     JLabel textLoss = new JLabel("");
     JLabel textWin = new JLabel("");
     JLabel why = new JLabel(" ");  // de認輸視窗的bug用的 沒有這個label 其他兩個label會有問題
@@ -27,7 +25,6 @@ public class Label{
         setRoundLabel();
         setShowRoundPlayer();
         setModeLabel();
-        setDifficultyLabels();
         setBoardButtons();
         setTextLoss();
         setTextWin();
@@ -65,18 +62,6 @@ public class Label{
         textmode.setOpaque(false);
         textmode.setBounds(980,480,280,45);
         textmode.setFont(new java.awt.Font("微軟正黑體",1,35));
-    }
-
-    public void setDifficultyLabels(){
-        difficultyTitle.setOpaque(false);
-        difficultyTitle.setBounds(980,620,120,45);
-        difficultyTitle.setFont(new java.awt.Font("微軟正黑體",1,35));
-
-        difficultyValue.setOpaque(true);
-        difficultyValue.setBounds(1100,620,160,45);
-        difficultyValue.setFont(new java.awt.Font("微軟正黑體",1,35));
-        difficultyValue.setBackground(UI.BACK_COLOR);
-        difficultyValue.setHorizontalAlignment(SwingConstants.LEFT);
     }
 
 
