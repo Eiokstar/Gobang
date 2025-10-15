@@ -423,6 +423,18 @@ public class Game {
             int aiPlayer = main.game.getCurrentPlayer();
             int opponent = aiPlayer == 1 ? 2 : 1;
 
+            int[] winningMove = findImmediateWinningMove(aiPlayer);
+            if(winningMove != null){
+                main.mouseListener.aiPlayChess(winningMove[0],winningMove[1]);
+                return;
+            }
+
+            int[] blockMove = findImmediateWinningMove(opponent);
+            if(blockMove != null){
+                main.mouseListener.aiPlayChess(blockMove[0],blockMove[1]);
+                return;
+            }
+
             ArrayList<int[]> candidates = generateCandidateMoves(aiPlayer,candidateWidth);
             if(candidates.isEmpty()){
                 makeBestMove(false);
@@ -728,6 +740,26 @@ public class Game {
                 }
             }
             return false;
+        }
+
+        private int[] findImmediateWinningMove(int player){
+            for(int x=0;x<=14;x++){
+                for(int y=0;y<=14;y++){
+                    if(allPlayChessed[x][y]!=0){
+                        continue;
+                    }
+                    if(!hasNearbyPieces(x,y)){
+                        continue;
+                    }
+                    allPlayChessed[x][y] = player;
+                    boolean wins = completesFive(x,y,player);
+                    allPlayChessed[x][y] = 0;
+                    if(wins){
+                        return new int[]{x,y};
+                    }
+                }
+            }
+            return null;
         }
 
         private int evaluateForPlayer(int x,int y,int player){
