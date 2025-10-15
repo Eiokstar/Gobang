@@ -2,12 +2,31 @@ package GoBang;
 
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import GoBang.Listener.MouseListener;
 import GoBang.main;
 
 public class Game {
     private int currentPlayer=1;
+
+    public enum Difficulty {
+        EASY("簡單AI"),
+        MEDIUM("中等AI"),
+        HARD("困難AI");
+
+        private final String displayName;
+
+        Difficulty(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    private Difficulty aiDifficulty = Difficulty.MEDIUM;
 
     public boolean Started;
     public boolean vsHumanMode;
@@ -120,6 +139,16 @@ public class Game {
      */
     public void changeCurrentPlayer(){
         currentPlayer = currentPlayer == 1 ?  2 : 1;
+    }
+
+    public Difficulty getAiDifficulty() {
+        return aiDifficulty;
+    }
+
+    public void setAiDifficulty(Difficulty aiDifficulty) {
+        if (aiDifficulty != null) {
+            this.aiDifficulty = aiDifficulty;
+        }
     }
 
 
@@ -310,18 +339,68 @@ public class Game {
     public static class Score {
 
         private static final int[][] DIRECTIONS = {{1,0},{0,1},{1,1},{1,-1}};
+        private final Random random = new Random();
 
         public void allChess(){
+            Game.Difficulty difficulty = main.game.getAiDifficulty();
+            if(difficulty == Game.Difficulty.EASY){
+                makeRandomMove();
+            }else if(difficulty == Game.Difficulty.HARD){
+                makeBestMove(true);
+            }else{
+                makeBestMove(false);
+            }
+        }
+
+        public int juddingScore(int i,int j){
+            int aiPlayer = main.game.getCurrentPlayer();
+            return juddingScore(i,j,aiPlayer);
+        }
+
+        public int juddingScore(int i,int j,int player){
+            int aiPlayer = player;
+            int opponent = aiPlayer == 1 ? 2 : 1;
+            int attackScore = evaluateForPlayer(i,j,aiPlayer);
+            int defendScore = evaluateForPlayer(i,j,opponent);
+            return attackScore * 2 + defendScore;
+        }
+
+        private void makeRandomMove(){
+            ArrayList<int[]> available = new ArrayList<>();
+            for(int i =0 ; i<=14; i++){
+                for(int j=0 ; j<=14 ;j++){
+                    if(allPlayChessed[i][j]==0){
+                        available.add(new int[]{i,j});
+                    }
+                    allScoreChessed[i][j]=0;
+                }
+            }
+
+            if(available.isEmpty()){
+                return;
+            }
+
+            int[] move;
+            if(main.game.chessMove==0){
+                move = new int[]{7,7};
+            }else{
+                move = available.get(random.nextInt(available.size()));
+            }
+            main.mouseListener.aiPlayChess(move[0],move[1]);
+        }
+
+        private void makeBestMove(boolean hardMode){
             int bestScore = Integer.MIN_VALUE;
             int bestX = -1;
             int bestY = -1;
+            int aiPlayer = main.game.getCurrentPlayer();
 
             for(int i =0 ; i<=14; i++){
                 for(int j=0 ; j<=14 ;j++){
                     if(allPlayChessed[i][j]==0){
-                        int score = juddingScore(i,j);
+                        int score = hardMode ? calculateHardScore(i,j,aiPlayer) : juddingScore(i,j,aiPlayer);
                         allScoreChessed[i][j]=score;
-                        if(score>bestScore){
+                        if(score>bestScore || (score==bestScore && isCloserToCenter(i,j,bestX,bestY))){
                             bestScore=score;
                             bestX=i;
                             bestY=j;
@@ -337,12 +416,38 @@ public class Game {
             }
         }
 
-        public int juddingScore(int i,int j){
-            int aiPlayer = main.game.getCurrentPlayer();
+        private int calculateHardScore(int x,int y,int aiPlayer){
+            int baseScore = juddingScore(x,y,aiPlayer);
             int opponent = aiPlayer == 1 ? 2 : 1;
-            int attackScore = evaluateForPlayer(i,j,aiPlayer);
-            int defendScore = evaluateForPlayer(i,j,opponent);
-            return attackScore * 2 + defendScore;
+            allPlayChessed[x][y] = aiPlayer;
+            int opponentBest = Integer.MIN_VALUE;
+
+            for(int i =0 ; i<=14; i++){
+                for(int j=0 ; j<=14 ;j++){
+                    if(allPlayChessed[i][j]==0){
+                        int score = juddingScore(i,j,opponent);
+                        if(score>opponentBest){
+                            opponentBest = score;
+                        }
+                    }
+                }
+            }
+
+            allPlayChessed[x][y] = 0;
+            if(opponentBest == Integer.MIN_VALUE){
+                opponentBest = 0;
+            }
+            return baseScore * 2 - opponentBest;
+        }
+
+        private boolean isCloserToCenter(int x,int y,int currentBestX,int currentBestY){
+            if(currentBestX<0 || currentBestY<0){
+                return true;
+            }
+            int center = 7;
+            int currentDist = Math.abs(currentBestX-center) + Math.abs(currentBestY-center);
+            int newDist = Math.abs(x-center) + Math.abs(y-center);
+            return newDist < currentDist;
         }
 
         private int evaluateForPlayer(int x,int y,int player){
