@@ -62,7 +62,11 @@ public class main {
     public static main getInstance(){
         return instance;
     }
-    public static void initGame(){game = new Game();}
+    public static void initGame(){
+        Game.Difficulty difficulty = game.getAiDifficulty();
+        game = new Game();
+        game.setAiDifficulty(difficulty);
+    }
     public static GoBang.UI getUI(){
         return UI;
     }
