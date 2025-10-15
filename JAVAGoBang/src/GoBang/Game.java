@@ -14,7 +14,9 @@ public class Game {
     public boolean vsComputerMode;
     public boolean firstHand;
     public boolean backHand;
-    public static boolean playerNotAIRound;
+    public boolean onlineMode;
+    public boolean onlineHost;
+    public boolean onlineMyTurn;
     public static int chessMove=0;
     public static int[][] allScoreChessed = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
     public static int[][] allPlayChessed = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
@@ -24,6 +26,8 @@ public class Game {
     Game(){
         initPlacePieces();
         initStatus();
+        reGamePlayChess();
+        resetScoreBoard();
     }
     public void initStatus(){
         Started = false;
@@ -31,12 +35,24 @@ public class Game {
         vsComputerMode = false;
         firstHand = false;
         backHand =false;
+        onlineMode = false;
+        onlineHost = false;
+        onlineMyTurn = false;
     }
 
     public void reGamePlayChess(){
         for(int i=0;i<=14;i++){
             for(int j=0;j<=14;j++){
                 allPlayChessed[i][j]=0;
+                allScoreChessed[i][j]=0;
+            }
+        }
+    }
+
+    private void resetScoreBoard(){
+        for(int i=0;i<=14;i++){
+            for(int j=0;j<=14;j++){
+                allScoreChessed[i][j]=0;
             }
         }
     }
@@ -89,21 +105,7 @@ public class Game {
      * 檢查位置是否已經被放過
      */
     public boolean LocIsPlaced(int x, int y){
-
-        for (int i = 0;i<getBlackPlacedPieces().size();i++){
-            int loc[] = getBlackPlacedPieces().get(i);
-            if (loc[0] == x & loc[1] == y){
-                return true;
-
-            }
-        }
-        for (int i = 0;i<getWhitePlacedPieces().size();i++){
-            int loc[] = getWhitePlacedPieces().get(i);
-            if (loc[0] == x & loc[1] == y){
-                return true;
-            }
-        }
-        return false;
+        return allPlayChessed[x][y] != 0;
     }
 
     /**
@@ -307,312 +309,105 @@ public class Game {
 
     public static class Score {
 
+        private static final int[][] DIRECTIONS = {{1,0},{0,1},{1,1},{1,-1}};
+
         public void allChess(){
-            int bigScore=0;
-            int bigX=0;
-            int bigY=0;
+            int bestScore = Integer.MIN_VALUE;
+            int bestX = -1;
+            int bestY = -1;
+
             for(int i =0 ; i<=14; i++){
                 for(int j=0 ; j<=14 ;j++){
                     if(allPlayChessed[i][j]==0){
-                        allScoreChessed[i][j]=juddingScore(i,j);
-                        System.out.println("i:"+i+" j:"+j+" " + allScoreChessed[i][j]);
-                    }
-
-                }
-
-            }
-
-            for(int i =0 ; i<=14; i++){
-                for(int j=0 ; j<=14 ;j++){
-                    if(allScoreChessed[i][j]>=bigScore){
-                        bigScore=allScoreChessed[i][j];
-                        bigX=i;
-                        bigY=j;
+                        int score = juddingScore(i,j);
+                        allScoreChessed[i][j]=score;
+                        if(score>bestScore){
+                            bestScore=score;
+                            bestX=i;
+                            bestY=j;
+                        }
+                    }else{
+                        allScoreChessed[i][j]=0;
                     }
                 }
             }
-            System.out.println("x:"+bigX+" y:"+bigY);
 
-            main.mouseListener.aiPlayChess(bigX,bigY);
-            for(int i =0 ; i<=14; i++){
-                for(int j=0 ; j<=14 ;j++){
-                    allScoreChessed[i][j]=0;
-                }
+            if(bestX>=0 && bestY>=0){
+                main.mouseListener.aiPlayChess(bestX,bestY);
             }
         }
 
         public int juddingScore(int i,int j){
-            int score=0;
-            int count=0;
-            if(i+1<=14){
-                if((allPlayChessed[i+1][j]==1)){
-                    count++;
-                    if(i+2<=14){
-                        if((allPlayChessed[i+2][j]==1)){
-                            count++;
-                            if(i+3<=14){
-                                if((allPlayChessed[i+3][j]==1)||(allPlayChessed[i+3][j]==0)){
-                                    count++;
-                                    if(i+4<=14){
-                                        if((allPlayChessed[i+4][j]==1)||(allPlayChessed[i+4][j]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
+            int aiPlayer = main.game.getCurrentPlayer();
+            int opponent = aiPlayer == 1 ? 2 : 1;
+            int attackScore = evaluateForPlayer(i,j,aiPlayer);
+            int defendScore = evaluateForPlayer(i,j,opponent);
+            return attackScore * 2 + defendScore;
+        }
 
-                        }
-                    }
-                }
+        private int evaluateForPlayer(int x,int y,int player){
+            int total = 0;
+            for(int[] dir : DIRECTIONS){
+                total += evaluateDirection(x,y,dir[0],dir[1],player);
             }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if(i-1>=0){
-                if((allPlayChessed[i-1][j]==1)){
-                    count++;
-                    if(i-2>=0){
-                        if((allPlayChessed[i-2][j]==1)){
-                            count++;
-                            if(i-3>=0){
-                                if((allPlayChessed[i-3][j]==1)||(allPlayChessed[i-3][j]==0)){
-                                    count++;
-                                    if(i-4>=0){
-                                        if((allPlayChessed[i-4][j]==1)||(allPlayChessed[i-4][j]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if(j+1<=14){
-                if((allPlayChessed[i][j+1]==1)){
-                    count++;
-                    if(j+2<=14){
-                        if((allPlayChessed[i][j+2]==1)){
-                            count++;
-                            if(j+3<=14){
-                                if((allPlayChessed[i][j+3]==1)||(allPlayChessed[i][j+3]==0)){
-                                    count++;
-                                    if(j+4<=14){
-                                        if((allPlayChessed[i][j+4]==1)||(allPlayChessed[i][j+4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
+            return total;
+        }
 
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if(j-1>=0){
-                if((allPlayChessed[i][j-1]==1)){
-                    count++;
-                    if(j-2>=0){
-                        if((allPlayChessed[i][j-2]==1)){
-                            count++;
-                            if(j-3>=0){
-                                if((allPlayChessed[i][j-3]==1)||(allPlayChessed[i][j-3]==0)){
-                                    count++;
-                                    if(j-4>=0){
-                                        if((allPlayChessed[i][j-4]==1)||(allPlayChessed[i][j-4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if((j+1<=14)&&(i+1<=14)){
-                if((allPlayChessed[i+1][j+1]==1)){
-                    count++;
-                    if((j+2<=14)&&(i+2<=14)){
-                        if((allPlayChessed[i+2][j+2]==1)){
-                            count++;
-                            if((j+3<=14)&&(i+3<=14)){
-                                if((allPlayChessed[i+3][j+3]==1)||(allPlayChessed[i+3][j+3]==0)){
-                                    count++;
-                                    if((j+4<=14)&&(i+4<=14)){
-                                        if((allPlayChessed[i+4][j+4]==1)||(allPlayChessed[i+4][j+4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
+        private int evaluateDirection(int x,int y,int dx,int dy,int player){
+            int count = 1;
+            int openEnds = 0;
 
-                        }
-                    }
-                }
+            int i = x + dx;
+            int j = y + dy;
+            while(inBounds(i,j) && allPlayChessed[i][j] == player){
+                count++;
+                i += dx;
+                j += dy;
             }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if((j-1>=0)&&(i-1>=0)){
-                if((allPlayChessed[i-1][j-1]==1)){
-                    count++;
-                    if((j-2>=0)&&(i-2>=0)){
-                        if((allPlayChessed[i-2][j-2]==1)){
-                            count++;
-                            if((j-3>=0)&&(i-3>=0)){
-                                if((allPlayChessed[i-3][j-3]==1)||(allPlayChessed[i-3][j-3]==0)){
-                                    count++;
-                                    if((j-4>=0)&&(i-4>=0)){
-                                        if((allPlayChessed[i-4][j-4]==1)||(allPlayChessed[i-4][j-4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if((j-1>=0)&&(i+1<=14)){
-                if((allPlayChessed[i+1][j-1]==1)){
-                    count++;
-                    if((j-2>=0)&&(i+2<=14)){
-                        if((allPlayChessed[i+2][j-2]==1)){
-                            count++;
-                            if((j-3>=0)&&(i+3<=14)){
-                                if((allPlayChessed[i+3][j-3]==1)||(allPlayChessed[i+3][j-3]==0)){
-                                    count++;
-                                    if((j-4>=0)&&(i+4<=14)){
-                                        if((allPlayChessed[i+4][j-4]==1)||(allPlayChessed[i+4][j-4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
-            }
-            count=0;
-            if((j+1<=14)&&(i-1>=0)){
-                if((allPlayChessed[i-1][j+1]==1)){
-                    count++;
-                    if((j+2<=14)&&(i-2>=0)){
-                        if((allPlayChessed[i-2][j+2]==1)){
-                            count++;
-                            if((j+3<=14)&&(i-3>=0)){
-                                if((allPlayChessed[i-3][j+3]==1)||(allPlayChessed[i-3][j+3]==0)){
-                                    count++;
-                                    if((j+4<=14)&&(i-4>=0)){
-                                        if((allPlayChessed[i-4][j+4]==1)||(allPlayChessed[i-4][j+4]==0)){
-                                            count++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(count>=1){
-                score+=10;
-                if(count>=2){
-                    score+=50;
-                    if(count>=3){
-                        score+=100;
-                        if(count>=4){
-                            score+=3000;
-                        }
-                    }
-                }
+            if(inBounds(i,j) && allPlayChessed[i][j] == 0){
+                openEnds++;
             }
 
-            return score;
+            i = x - dx;
+            j = y - dy;
+            while(inBounds(i,j) && allPlayChessed[i][j] == player){
+                count++;
+                i -= dx;
+                j -= dy;
+            }
+            if(inBounds(i,j) && allPlayChessed[i][j] == 0){
+                openEnds++;
+            }
+
+            if(count >= 5){
+                return 100000;
+            }
+            if(count == 4 && openEnds == 2){
+                return 10000;
+            }
+            if(count == 4 && openEnds == 1){
+                return 4000;
+            }
+            if(count == 3 && openEnds == 2){
+                return 2000;
+            }
+            if(count == 3 && openEnds == 1){
+                return 400;
+            }
+            if(count == 2 && openEnds == 2){
+                return 200;
+            }
+            if(count == 2 && openEnds == 1){
+                return 40;
+            }
+            if(count == 1 && openEnds == 2){
+                return 10;
+            }
+            return 2;
+        }
+
+        private boolean inBounds(int x,int y){
+            return x>=0 && x<=14 && y>=0 && y<=14;
         }
 
     }
