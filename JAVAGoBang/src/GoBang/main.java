@@ -1,6 +1,5 @@
 package GoBang;
 
-
 import GoBang.Listener.ActionListener;
 import GoBang.Listener.MouseListener;
 import GoBang.Game.Judging;
@@ -8,12 +7,12 @@ import GoBang.Game.Score;
 import GoBang.network.NetworkManager;
 import GoBang.MoveCoordinator;
 
-
 import javax.swing.*;
+
 public class main {
 
     public static main instance;
-    public static UI UI= new UI();
+    public static UI UI = new UI();
     public static Game game = new Game();
     public static Judging judging = new Judging();
     public static Score score = new Score();
@@ -22,12 +21,13 @@ public class main {
     public ActionListener actionListener = new ActionListener();
     public static MouseListener mouseListener = new MouseListener();
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         instance = new main();
         UI.showUI();
     }
 
-    public main(){
+    public main() {
+        // 網路事件處理註冊
         networkManager.setMoveHandler(new NetworkManager.MoveHandler() {
             @Override
             public void onMoveReceived(int x, int y) {
@@ -40,6 +40,7 @@ public class main {
                 game.onlineMode = true;
                 game.onlineHost = asHost;
                 game.onlineMyTurn = asHost;
+
                 SwingUtilities.invokeLater(() -> {
                     UI.setPlayersLabel("本地玩家  VS  遠端玩家");
                     UI.setRoundLabel();
@@ -63,29 +64,32 @@ public class main {
         });
     }
 
-    public static main getInstance(){
+    public static main getInstance() {
         return instance;
     }
-    public static void initGame(){
+
+    /** 重新初始化遊戲資料，但保留難度設定 */
+    public static void initGame() {
         Game.Difficulty difficulty = game.getAiDifficulty();
         game = new Game();
         game.setAiDifficulty(difficulty);
+
         moveCoordinator.setGame(game);
         moveCoordinator.setJudging(judging);
         moveCoordinator.setScore(score);
         moveCoordinator.setUi(UI);
         moveCoordinator.setNetworkManager(networkManager);
     }
-    public static GoBang.UI getUI(){
+
+    public static UI getUI() {
         return UI;
     }
-    public static GoBang.Listener.MouseListener getMouseListener(){
+
+    public static MouseListener getMouseListener() {
         return mouseListener;
     }
 
-    public static MoveCoordinator getMoveCoordinator(){
+    public static MoveCoordinator getMoveCoordinator() {
         return moveCoordinator;
     }
-
-
 }
