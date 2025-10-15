@@ -162,6 +162,7 @@ public class UI extends JPanel{
     public void reSetUIAndGame(){
         initUI();
         main.initGame();
+        main.moveCoordinator.setUi(this);
         initRoundLabel();
         judging.setNumberWinLine();
         labels.textRound.setText(" ");
