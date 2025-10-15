@@ -1,5 +1,6 @@
 package GoBang.Listener;
 
+import GoBang.Game;
 import GoBang.main;
 
 import java.awt.event.ActionEvent;
@@ -13,8 +14,11 @@ import static GoBang.main.score;
 public class ActionListener implements java.awt.event.ActionListener {
 
     private static final String MODE_PVP = "玩家VS玩家";
-    private static final String MODE_AI = "玩家VS高級AI";
-    private static final String MODE_AI_ALT = "玩家VS電腦";
+    private static final String MODE_AI = "玩家VS電腦";
+    private static final String MODE_AI_LEGACY = "玩家VS高級AI";
+    private static final String DIFFICULTY_EASY = "簡單AI";
+    private static final String DIFFICULTY_MEDIUM = "中等AI";
+    private static final String DIFFICULTY_HARD = "困難AI";
     private static final String MODE_ONLINE = "聯機對戰";
 
     private GoBang.UI UI = main.getUI();
@@ -27,11 +31,20 @@ public class ActionListener implements java.awt.event.ActionListener {
                 selectHumanVsHuman();
                 break;
             case MODE_AI:
-            case MODE_AI_ALT:
+            case MODE_AI_LEGACY:
                 selectHumanVsAI();
                 break;
             case MODE_ONLINE:
                 selectOnlineMode();
+                break;
+            case DIFFICULTY_EASY:
+                changeAIDifficulty(Game.Difficulty.EASY);
+                break;
+            case DIFFICULTY_MEDIUM:
+                changeAIDifficulty(Game.Difficulty.MEDIUM);
+                break;
+            case DIFFICULTY_HARD:
+                changeAIDifficulty(Game.Difficulty.HARD);
                 break;
             case "重新":
                 resetGame();
@@ -73,6 +86,7 @@ public class ActionListener implements java.awt.event.ActionListener {
         game.firstHand = false;
         game.backHand = false;
         UI.setPlayersLabel("玩家一  VS  玩家二");
+        UI.setDifficultyLabel(game.getAiDifficulty());
     }
 
     private void selectHumanVsAI(){
@@ -85,7 +99,8 @@ public class ActionListener implements java.awt.event.ActionListener {
         game.onlineMode = false;
         game.firstHand = false;
         game.backHand = false;
-        UI.setPlayersLabel("玩家  VS  高級AI");
+        UI.setPlayersLabel("玩家  VS  " + game.getAiDifficulty().getDisplayName());
+        UI.setDifficultyLabel(game.getAiDifficulty());
     }
 
     private void selectOnlineMode(){
@@ -100,6 +115,7 @@ public class ActionListener implements java.awt.event.ActionListener {
         game.firstHand = false;
         game.backHand = false;
         UI.setPlayersLabel("本地玩家  VS  遠端玩家");
+        UI.setDifficultyLabel(game.getAiDifficulty());
 
         String[] options = {"建立房間","加入房間","取消"};
         int result = JOptionPane.showOptionDialog(UI.windows, "請選擇聯機方式", "聯機對戰", JOptionPane.DEFAULT_OPTION,
@@ -204,7 +220,11 @@ public class ActionListener implements java.awt.event.ActionListener {
             game.Started = true;
             UI.setRoundLabel();
             if(game.vsComputerMode && game.backHand){
-                SwingUtilities.invokeLater(() -> score.allChess());
+                if(game.chessMove==0){
+                    SwingUtilities.invokeLater(() -> main.mouseListener.aiPlayChess(7,7));
+                }else{
+                    SwingUtilities.invokeLater(() -> score.allChess());
+                }
             }
         }
     }
@@ -292,5 +312,28 @@ public class ActionListener implements java.awt.event.ActionListener {
             game.backHand=true;
             game.firstHand=false;
         }
+    }
+
+    private void changeAIDifficulty(Game.Difficulty difficulty){
+        if(difficulty == null){
+            return;
+        }
+
+        if(!game.vsComputerMode && game.Started){
+            JOptionPane.showMessageDialog(UI.windows, "請先重新遊戲後再切換模式。", "提示", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        boolean needSelectMode = !game.vsComputerMode && !game.Started;
+        game.setAiDifficulty(difficulty);
+        if(needSelectMode){
+            selectHumanVsAI();
+            game.setAiDifficulty(difficulty);
+        }
+
+        if(game.vsComputerMode){
+            UI.setPlayersLabel("玩家  VS  " + game.getAiDifficulty().getDisplayName());
+        }
+        UI.setDifficultyLabel(game.getAiDifficulty());
     }
 }
