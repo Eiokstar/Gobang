@@ -1,27 +1,19 @@
 package GoBang.Listener;
 
-import GoBang.Game;
+import GoBang.MoveCoordinator;
 import GoBang.main;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 import static GoBang.main.game;
-import static GoBang.main.judging;
-import static GoBang.main.score;
 
 
 
 public class MouseListener implements java.awt.event.MouseListener {
     private GoBang.UI UI = main.getUI();
-
-    private enum MoveSource {
-        LOCAL,
-        AI,
-        REMOTE
-    }
+    private MoveCoordinator moveCoordinator = main.getMoveCoordinator();
 
 
     // 獲得 for 循環所有pointbutton 比對 x 和 y 座標 如果 = 點擊 獲得 index
@@ -46,62 +38,15 @@ public class MouseListener implements java.awt.event.MouseListener {
             return;
         }
 
-        placePiece(loc[0], loc[1], MoveSource.LOCAL);
+        moveCoordinator.handleLocalMove(loc[0], loc[1]);
     }
 
     public void aiPlayChess(int x, int y){
-        if(game.getCurrentPlayer()==2){
-            placePiece(x, y, MoveSource.AI);
-        }
+        moveCoordinator.handleAiMove(x, y);
     }
 
     public void handleRemoteMove(int x,int y){
-        if(game.onlineMode){
-            placePiece(x, y, MoveSource.REMOTE);
-        }
-    }
-
-    private void placePiece(int boardX, int boardY, MoveSource source){
-        if (!game.Started) {
-            return;
-        }
-
-        if (game.LocIsPlaced(boardX,boardY)) {
-            return;
-        }
-
-        int placedPlayer = game.getCurrentPlayer();
-        JLabel checkPoint = UI.labels.boardButtons[boardX][boardY];
-        UI.DrawPiecesInBoard(checkPoint.getX(),checkPoint.getY()+28, placedPlayer);
-        game.addPointToPlacedPieces(placedPlayer,boardX,boardY);
-        game.allPlayChessed[boardX][boardY]=placedPlayer;
-        game.chessMove++;
-
-        judging.judgingAndBureau();
-        UI.DrawSamllPiecesBoard(new int[]{boardX, boardY});
-        judgingBlockLeftLine(placedPlayer);
-
-        game.changeCurrentPlayer();
-        handlePostMove(source, boardX, boardY);
-    }
-
-    private void handlePostMove(MoveSource source, int boardX, int boardY){
-        if(game.onlineMode){
-            if(source == MoveSource.LOCAL){
-                main.networkManager.sendMove(boardX, boardY);
-                game.onlineMyTurn = false;
-            }else if(source == MoveSource.REMOTE){
-                game.onlineMyTurn = true;
-            }
-            UI.setRoundLabel();
-            return;
-        }
-
-        if(game.vsComputerMode && source == MoveSource.LOCAL){
-            SwingUtilities.invokeLater(() -> score.allChess());
-        }
-
-        UI.setRoundLabel();
+        moveCoordinator.handleRemoteMove(x, y);
     }
 
     private int[] getClickLoc(int x , int y){
@@ -116,49 +61,6 @@ public class MouseListener implements java.awt.event.MouseListener {
             }
         }
         return null;
-    }
-
-    private void judgingBlockLeftLine(int placedPlayer){
-        if(placedPlayer==1){
-            int blackLoc01[] = game.getWhitePlacedPieces().get(game.getWhitePlacedPieces().size() - 1);
-            int blackSize =game.getWhitePlacedPieces().size();
-            ArrayList<int[]> blackLoc =(game.getWhitePlacedPieces());
-            judging.setNumberWinLine();
-
-            judging.judgingHorizontalineLeft(blackLoc01,blackSize,blackLoc);
-            judging.judgingHorizontalineRight(blackLoc01,blackSize, blackLoc);
-
-            judging.judgingStraightlineDown(blackLoc01,blackSize, blackLoc);
-            judging.judgingStraightlineOn(blackLoc01,blackSize, blackLoc);
-
-            judging.judgingRightslashDown(blackLoc01,blackSize, blackLoc);
-            judging.judgingRightslashOn(blackLoc01,blackSize, blackLoc);
-
-            judging.judgingLeftslashDown(blackLoc01,blackSize, blackLoc);
-            judging.judgingLeftslashOn(blackLoc01,blackSize, blackLoc);
-
-            judging.lineWin(placedPlayer);
-        }
-        if(placedPlayer==2){
-            int whiteMaxLoc01[] = game.getBlackPlacedPieces().get(game.getBlackPlacedPieces().size() - 1);
-            int whiteSize =game.getBlackPlacedPieces().size();
-            ArrayList<int[]> whiteLoc =(game.getBlackPlacedPieces());
-            judging.setNumberWinLine();
-
-            judging.judgingHorizontalineLeft(whiteMaxLoc01,whiteSize,whiteLoc);
-            judging.judgingHorizontalineRight(whiteMaxLoc01,whiteSize,whiteLoc);
-
-            judging.judgingStraightlineDown(whiteMaxLoc01,whiteSize,whiteLoc);
-            judging.judgingStraightlineOn(whiteMaxLoc01,whiteSize,whiteLoc);
-
-            judging.judgingRightslashDown(whiteMaxLoc01,whiteSize,whiteLoc);
-            judging.judgingRightslashOn(whiteMaxLoc01,whiteSize,whiteLoc);
-
-            judging.judgingLeftslashDown(whiteMaxLoc01,whiteSize,whiteLoc);
-            judging.judgingLeftslashOn(whiteMaxLoc01,whiteSize,whiteLoc);
-
-            judging.lineWin(placedPlayer);
-        }
     }
 
     @Override
