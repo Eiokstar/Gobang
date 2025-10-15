@@ -344,11 +344,14 @@ public class Game {
         public void allChess(){
             Game.Difficulty difficulty = main.game.getAiDifficulty();
             if(difficulty == Game.Difficulty.EASY){
-                makeRandomMove();
-            }else if(difficulty == Game.Difficulty.HARD){
-                makeBestMove(true);
-            }else{
+                // 原本的中等難度評估邏輯移至簡單難度
                 makeBestMove(false);
+            }else if(difficulty == Game.Difficulty.MEDIUM){
+                // 新的中等難度：使用淺層極大極小策略，兼顧攻守
+                makeStrategicMove(2, 12, false);
+            }else{
+                // 新的困難難度：更深層的搜尋並偏向進攻
+                makeStrategicMove(3, 16, true);
             }
         }
 
@@ -416,6 +419,265 @@ public class Game {
             }
         }
 
+        private void makeStrategicMove(int depth,int candidateWidth,boolean aggressive){
+            int aiPlayer = main.game.getCurrentPlayer();
+            int opponent = aiPlayer == 1 ? 2 : 1;
+
+            int[] immediateWin = findImmediateLineCompletion(aiPlayer);
+            if(immediateWin != null){
+                main.mouseListener.aiPlayChess(immediateWin[0],immediateWin[1]);
+                return;
+            }
+
+            int[] urgentBlock = findImmediateLineCompletion(opponent);
+            if(urgentBlock != null){
+                main.mouseListener.aiPlayChess(urgentBlock[0],urgentBlock[1]);
+                return;
+            }
+
+            ArrayList<int[]> candidates = generateCandidateMoves(aiPlayer,candidateWidth);
+            if(candidates.isEmpty()){
+                makeBestMove(false);
+                return;
+            }
+
+            int bestScore = Integer.MIN_VALUE;
+            int bestX = -1;
+            int bestY = -1;
+
+            for(int[] move : candidates){
+                int x = move[0];
+                int y = move[1];
+                allPlayChessed[x][y] = aiPlayer;
+                int score;
+                if(completesFive(x,y,aiPlayer)){
+                    score = Integer.MAX_VALUE/4;
+                }else{
+                    score = minimax(depth - 1,false,aiPlayer,opponent,candidateWidth,aggressive,Integer.MIN_VALUE/2,Integer.MAX_VALUE/2);
+                }
+                allPlayChessed[x][y] = 0;
+
+                if(score>bestScore || (score==bestScore && isCloserToCenter(x,y,bestX,bestY))){
+                    bestScore = score;
+                    bestX = x;
+                    bestY = y;
+                }
+            }
+
+            if(bestX>=0 && bestY>=0){
+                main.mouseListener.aiPlayChess(bestX,bestY);
+            }else{
+                makeBestMove(false);
+            }
+        }
+
+        private int[] findImmediateLineCompletion(int player){
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=0){
+                        continue;
+                    }
+                    allPlayChessed[i][j] = player;
+                    boolean completes = completesFive(i,j,player);
+                    allPlayChessed[i][j] = 0;
+                    if(completes){
+                        return new int[]{i,j};
+                    }
+                }
+            }
+            return null;
+        }
+
+        private int minimax(int depth,boolean maximizing,int aiPlayer,int currentPlayer,int candidateWidth,boolean aggressive,int alpha,int beta){
+            int opponent = currentPlayer == 1 ? 2 : 1;
+
+            if(depth<=0 || isBoardFull()){
+                return evaluateBoardState(aiPlayer,aggressive);
+            }
+
+            ArrayList<int[]> moves = generateCandidateMoves(currentPlayer,candidateWidth);
+            if(moves.isEmpty()){
+                return evaluateBoardState(aiPlayer,aggressive);
+            }
+
+            if(maximizing){
+                int maxEval = Integer.MIN_VALUE;
+                for(int[] move : moves){
+                    int x = move[0];
+                    int y = move[1];
+                    allPlayChessed[x][y] = currentPlayer;
+                    int eval;
+                    if(completesFive(x,y,currentPlayer)){
+                        eval = currentPlayer == aiPlayer ? Integer.MAX_VALUE/4 : Integer.MIN_VALUE/4;
+                    }else{
+                        eval = minimax(depth-1,false,aiPlayer,opponent,candidateWidth,aggressive,alpha,beta);
+                    }
+                    allPlayChessed[x][y] = 0;
+                    if(eval>maxEval){
+                        maxEval = eval;
+                    }
+                    if(eval>alpha){
+                        alpha = eval;
+                    }
+                    if(beta<=alpha){
+                        break;
+                    }
+                }
+                return maxEval;
+            }else{
+                int minEval = Integer.MAX_VALUE;
+                for(int[] move : moves){
+                    int x = move[0];
+                    int y = move[1];
+                    allPlayChessed[x][y] = currentPlayer;
+                    int eval;
+                    if(completesFive(x,y,currentPlayer)){
+                        eval = currentPlayer == aiPlayer ? Integer.MAX_VALUE/4 : Integer.MIN_VALUE/4;
+                    }else{
+                        eval = minimax(depth-1,true,aiPlayer,opponent,candidateWidth,aggressive,alpha,beta);
+                    }
+                    allPlayChessed[x][y] = 0;
+                    if(eval<minEval){
+                        minEval = eval;
+                    }
+                    if(eval<beta){
+                        beta = eval;
+                    }
+                    if(beta<=alpha){
+                        break;
+                    }
+                }
+                return minEval;
+            }
+        }
+
+        private ArrayList<int[]> generateCandidateMoves(int perspectivePlayer,int candidateWidth){
+            ArrayList<int[]> result = new ArrayList<>();
+            ArrayList<int[]> scoredMoves = new ArrayList<>();
+            ArrayList<int[]> defensiveMoves = new ArrayList<>();
+            boolean hasPieces = false;
+
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=0){
+                        hasPieces = true;
+                        continue;
+                    }
+                    if(!hasNearbyPieces(i,j)){
+                        continue;
+                    }
+                    int opponent = perspectivePlayer == 1 ? 2 : 1;
+                    int attackScore = evaluateForPlayer(i,j,perspectivePlayer);
+                    int defendScore = evaluateForPlayer(i,j,opponent);
+                    int combinedScore = attackScore * 2 + defendScore;
+                    scoredMoves.add(new int[]{i,j,combinedScore,defendScore});
+                    defensiveMoves.add(new int[]{i,j,defendScore});
+                }
+            }
+
+            if(!hasPieces){
+                result.add(new int[]{7,7});
+                return result;
+            }
+
+            scoredMoves.sort((a,b) -> Integer.compare(b[2],a[2]));
+            defensiveMoves.sort((a,b) -> Integer.compare(b[2],a[2]));
+
+            int limit = candidateWidth>0 ? Math.min(candidateWidth, scoredMoves.size()) : scoredMoves.size();
+            for(int idx=0; idx<limit; idx++){
+                int[] move = scoredMoves.get(idx);
+                result.add(new int[]{move[0],move[1]});
+            }
+
+            int extraDefensive = Math.min(3, defensiveMoves.size());
+            for(int idx=0; idx<extraDefensive; idx++){
+                int[] move = defensiveMoves.get(idx);
+                if(!containsMove(result,move[0],move[1])){
+                    result.add(new int[]{move[0],move[1]});
+                }
+            }
+            return result;
+        }
+
+        private boolean hasNearbyPieces(int x,int y){
+            for(int dx=-2; dx<=2; dx++){
+                for(int dy=-2; dy<=2; dy++){
+                    if(dx==0 && dy==0){
+                        continue;
+                    }
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if(inBounds(nx,ny) && allPlayChessed[nx][ny]!=0){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private boolean isBoardFull(){
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]==0){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private int evaluateBoardState(int aiPlayer,boolean aggressive){
+            int opponent = aiPlayer == 1 ? 2 : 1;
+            if(hasWinningLine(aiPlayer)){
+                return Integer.MAX_VALUE/4;
+            }
+            if(hasWinningLine(opponent)){
+                return Integer.MIN_VALUE/4;
+            }
+
+            int bestAi = 0;
+            int secondAi = 0;
+            int bestOpponent = 0;
+            int secondOpponent = 0;
+
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=0){
+                        continue;
+                    }
+                    int aiScore = juddingScore(i,j,aiPlayer);
+                    int opponentScore = juddingScore(i,j,opponent);
+                    if(aiScore>bestAi){
+                        secondAi = bestAi;
+                        bestAi = aiScore;
+                    }else if(aiScore>secondAi){
+                        secondAi = aiScore;
+                    }
+                    if(opponentScore>bestOpponent){
+                        secondOpponent = bestOpponent;
+                        bestOpponent = opponentScore;
+                    }else if(opponentScore>secondOpponent){
+                        secondOpponent = opponentScore;
+                    }
+                }
+            }
+
+            if(bestAi>=100000){
+                return Integer.MAX_VALUE/4;
+            }
+            if(bestOpponent>=100000){
+                return Integer.MIN_VALUE/4;
+            }
+
+            int aiValue = bestAi + secondAi/2;
+            int opponentValue = bestOpponent + secondOpponent/2;
+
+            if(aggressive){
+                aiValue = aiValue * 2;
+            }
+            return aiValue - opponentValue;
+        }
+
         private int calculateHardScore(int x,int y,int aiPlayer){
             int baseScore = juddingScore(x,y,aiPlayer);
             int opponent = aiPlayer == 1 ? 2 : 1;
@@ -448,6 +710,53 @@ public class Game {
             int currentDist = Math.abs(currentBestX-center) + Math.abs(currentBestY-center);
             int newDist = Math.abs(x-center) + Math.abs(y-center);
             return newDist < currentDist;
+        }
+
+        private boolean containsMove(ArrayList<int[]> moves,int x,int y){
+            for(int[] move : moves){
+                if(move[0]==x && move[1]==y){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean completesFive(int x,int y,int player){
+            for(int[] dir : DIRECTIONS){
+                int count = 1;
+                count += countStones(x,y,dir[0],dir[1],player);
+                count += countStones(x,y,-dir[0],-dir[1],player);
+                if(count>=5){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private int countStones(int x,int y,int dx,int dy,int player){
+            int count = 0;
+            int nx = x + dx;
+            int ny = y + dy;
+            while(inBounds(nx,ny) && allPlayChessed[nx][ny]==player){
+                count++;
+                nx += dx;
+                ny += dy;
+            }
+            return count;
+        }
+
+        private boolean hasWinningLine(int player){
+            for(int i=0;i<=14;i++){
+                for(int j=0;j<=14;j++){
+                    if(allPlayChessed[i][j]!=player){
+                        continue;
+                    }
+                    if(completesFive(i,j,player)){
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private int evaluateForPlayer(int x,int y,int player){
