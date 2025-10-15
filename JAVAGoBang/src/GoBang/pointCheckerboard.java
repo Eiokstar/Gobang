@@ -19,14 +19,6 @@ public class pointCheckerboard extends JComponent  {
 
         this.g = g;
         this.player=player;
-        if(game.backHand){
-            if(player==1){
-                this.player=2;
-            }
-            if(player==2){
-                this.player=1;
-            }
-        }
 
     }
     pointCheckerboard(Graphics g,int[] loc){

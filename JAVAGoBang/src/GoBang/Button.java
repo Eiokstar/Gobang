@@ -6,7 +6,7 @@ public  class Button{
     private main instance = main.getInstance();
     static int x01 = 140,  y02=530 ,x03=1040;
     JButton[] topButton = new JButton[4];
-    JButton[] chooseButton = new JButton[2];
+    JButton[] chooseButton = new JButton[3];
     JButton[] firstbackButton = new JButton[2];
     JButton sureButton = new JButton("確定");
     JButton piecesDisappear = new JButton("回復棋子");
@@ -37,7 +37,7 @@ public  class Button{
         }
         return topButton;
     }
-    String[] chooseButtonName = {"玩家VS玩家","玩家VS高級AI"};
+    String[] chooseButtonName = {"玩家VS玩家","玩家VS高級AI","聯機對戰"};
 
     public JButton[] ChooseButton(){
         for (int i = 0, j = 0; i < chooseButtonName.length; i++, j += 70) {

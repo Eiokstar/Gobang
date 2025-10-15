@@ -1,7 +1,5 @@
 package GoBang;
 
-import GoBang.Listener.MouseListener;
-
 import java.awt.*;
 import javax.swing.*;
 import java.awt.geom.Rectangle2D;
@@ -14,7 +12,7 @@ public class UI extends JPanel{
     static final Color BACK_COLOR = new Color(200, 195, 214);
 
     public Label labels = new Label();
-    public JFrame windows = new JFrame("五子棋(單機版)");
+    public JFrame windows = new JFrame("五子棋");
     public JFrame lossFram = new JFrame("認輸");
     public JFrame winFram = new JFrame("五子連珠");
     public JFrame andBureauFram = new JFrame("和局");
@@ -113,7 +111,7 @@ public class UI extends JPanel{
         for(int i = 0 ;i<15;i++){
             for (int j = 0;j<15;j++){
                 windows.add(labels.boardButtons[i][j]);
-                labels.boardButtons[i][j].addMouseListener(new MouseListener());
+                labels.boardButtons[i][j].addMouseListener(main.mouseListener);
             }
         }
 
@@ -162,6 +160,7 @@ public class UI extends JPanel{
         judging.setNumberWinLine();
         labels.textRound.setText(" ");
         labels.showRoundPlayer[0].setText(" ");
+        main.networkManager.close();
     }
     private void setRound(String str){
         labels.textRound.setText("目前回合: "+str);
@@ -174,12 +173,28 @@ public class UI extends JPanel{
 
 
     public void setRoundLabel(){
+        if(!game.Started){
+            setRound(" ");
+            return;
+        }
+
+        if(game.onlineMode){
+            String roundPlayer = game.onlineMyTurn ? "本地玩家" : "遠端玩家";
+            setRound(roundPlayer);
+            return;
+        }
+
         if(game.vsHumanMode){
             setRound(main.UI.labels.RoundPlayerName[game.getCurrentPlayer()-1]);
+            return;
         }
         if(game.vsComputerMode){
-            setRound(main.UI.labels.RoundPlayerName[game.getCurrentPlayer()+1]);
+            String[] names = main.UI.labels.RoundPlayerName;
+            String roundPlayer = game.getCurrentPlayer()==1 ? names[2] : names[3];
+            setRound(roundPlayer);
+            return;
         }
+        setRound(" ");
     }
     public void lossFarm(){
         Button button = new Button();
