@@ -1,23 +1,28 @@
 package GoBang;
 
 import javax.swing.*;
+import java.awt.*;
 
-public  class Button{
-    private main instance = main.getInstance();
-    static int x01 = 140,  y02=530 ,x03=1340;
+public class Button {
+    private final Main instance = Main.getInstance();
+
     JButton[] topButton = new JButton[4];
     JButton[] chooseButton = new JButton[3];
     JButton[] difficultyButtons = new JButton[3];
     JButton[] firstbackButton = new JButton[2];
     JButton sureButton = new JButton("確定");
     JButton piecesDisappear = new JButton("回復棋子");
-    String[] topButtonImageLocation = {"image/fast01.png","image/magic-wand01.png","image/whiteflag01.png","image/return01.png"};
-    String[] topButtonName = {"開始","悔棋","認輸","重新"};
-    String[] firstbackName ={"先手","後手"};
-    String[] difficultyButtonName = {"簡單AI","中等AI","困難AI"};
 
+    String[] topButtonImageLocation = {
+            "image/fast01.png", "image/magic-wand01.png",
+            "image/whiteflag01.png", "image/return01.png"
+    };
+    String[] topButtonName = {"開始", "悔棋", "認輸", "重新"};
+    String[] firstbackName = {"先手", "後手"};
+    String[] difficultyButtonName = {"簡單AI", "中等AI", "困難AI"};
+    String[] chooseButtonName = {"玩家VS玩家", "玩家VS電腦", "聯機對戰"};
 
-    Button(){
+    public Button() {
         TopButton();
         ChooseButton();
         DifficultyButtons();
@@ -26,69 +31,74 @@ public  class Button{
         firstBack();
     }
 
-
-    public JButton[] TopButton(){
-
-        for(int i =0,j=0; i<4;i++,j=200){
-            topButton[i]=new JButton(topButtonName[i]);
+    // 上方四個按鈕（開始、悔棋、認輸、重新）
+    public JButton[] TopButton() {
+        for (int i = 0; i < topButton.length; i++) {
+            topButton[i] = new JButton(topButtonName[i]);
             topButton[i].addActionListener(instance.actionListener);
-            topButton[i].setBounds(x01=x01+j,10,135,65);
+            topButton[i].setFont(new Font("微軟正黑體", Font.BOLD, 20));
+            topButton[i].setPreferredSize(new Dimension(150, 60));
+            topButton[i].setFocusPainted(false);
             topButton[i].setBorder(BorderFactory.createRaisedBevelBorder());
-            topButton[i].setFont(new  java.awt.Font("微軟正黑體",  1,  20));
             topButton[i].setIcon(new ImageIcon(getClass().getResource(topButtonImageLocation[i])));
-            topButton[i].setBorderPainted(false);
         }
         return topButton;
     }
-    String[] chooseButtonName = {"玩家VS玩家","玩家VS電腦","聯機對戰"};
 
-    public JButton[] ChooseButton(){
-        for (int i = 0, j = 0; i < chooseButtonName.length; i++, j += 70) {
+    // 模式選擇按鈕（玩家VS玩家、玩家VS電腦、聯機對戰）
+    public JButton[] ChooseButton() {
+        for (int i = 0; i < chooseButtonName.length; i++) {
             chooseButton[i] = new JButton(chooseButtonName[i]);
             chooseButton[i].addActionListener(instance.actionListener);
-            chooseButton[i].setBounds(1020, y02 + j, 220, 45);
-            chooseButton[i].setFont(new java.awt.Font("微軟正黑體", 1, 30));
+            chooseButton[i].setFont(new Font("微軟正黑體", Font.BOLD, 28));
+            chooseButton[i].setFocusPainted(false);
             chooseButton[i].setBorder(BorderFactory.createRaisedBevelBorder());
-            chooseButton[i].setBorderPainted(false);
+            chooseButton[i].setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseButton[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
         }
         return chooseButton;
     }
 
-    public JButton[] DifficultyButtons(){
-        int startY = y02 + chooseButtonName.length * 70 + 40;
-        for (int i = 0, j = 0; i < difficultyButtonName.length; i++, j += 60) {
+    // AI 難度按鈕（簡單AI、中等AI、困難AI）
+    public JButton[] DifficultyButtons() {
+        for (int i = 0; i < difficultyButtonName.length; i++) {
             difficultyButtons[i] = new JButton(difficultyButtonName[i]);
             difficultyButtons[i].addActionListener(instance.actionListener);
-            difficultyButtons[i].setBounds(1020, startY + j, 220, 45);
-            difficultyButtons[i].setFont(new java.awt.Font("微軟正黑體", 1, 30));
+            difficultyButtons[i].setFont(new Font("微軟正黑體", Font.BOLD, 24));
+            difficultyButtons[i].setFocusPainted(false);
             difficultyButtons[i].setBorder(BorderFactory.createRaisedBevelBorder());
-            difficultyButtons[i].setBorderPainted(false);
+            difficultyButtons[i].setAlignmentX(Component.LEFT_ALIGNMENT);
+            difficultyButtons[i].setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         }
         return difficultyButtons;
     }
-    public JButton[] firstBack(){
-        for(int i=0,j=0;i<2;i++,j=100){
-            firstbackButton[i]=new JButton(firstbackName[i]);
+
+    // 先手 / 後手 按鈕
+    public JButton[] firstBack() {
+        for (int i = 0; i < firstbackButton.length; i++) {
+            firstbackButton[i] = new JButton(firstbackName[i]);
             firstbackButton[i].addActionListener(instance.actionListener);
-            firstbackButton[i].setBounds(x03+j,670,80,45);
-            firstbackButton[i].setFont(new  java.awt.Font("微軟正黑體",  1,  30));
+            firstbackButton[i].setFont(new Font("微軟正黑體", Font.BOLD, 26));
+            firstbackButton[i].setFocusPainted(false);
             firstbackButton[i].setBorder(BorderFactory.createRaisedBevelBorder());
-            firstbackButton[i].setBorderPainted(false);
+            firstbackButton[i].setPreferredSize(new Dimension(100, 50));
         }
         return firstbackButton;
     }
-    public JButton SureButton(){
+
+    // 確定按鈕
+    public JButton SureButton() {
         sureButton.addActionListener(instance.actionListener);
-        sureButton.setBounds(140,230,100,45);
-        sureButton.setFont(new  java.awt.Font("微軟正黑體",  1,  30));
+        sureButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
+        sureButton.setFocusPainted(false);
         return sureButton;
     }
-    public JButton PiecesDisappear(){
+
+    // 回復棋子按鈕
+    public JButton PiecesDisappear() {
         piecesDisappear.addActionListener(instance.actionListener);
-        piecesDisappear.setBounds(1120,820,200,45);
-        piecesDisappear.setFont(new  java.awt.Font("微軟正黑體",  1,  30));
-        piecesDisappear.setBorderPainted(false);
+        piecesDisappear.setFont(new Font("微軟正黑體", Font.BOLD, 26));
+        piecesDisappear.setFocusPainted(false);
         return piecesDisappear;
     }
-
 }
